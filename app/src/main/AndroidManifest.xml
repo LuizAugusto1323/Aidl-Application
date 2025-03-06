@@ -13,11 +13,11 @@
         android:theme="@style/Theme.AIDLApplication"
         tools:targetApi="31">
         <service
-            android:name=".EncryptionService"
+            android:name=".CypherService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="br.com.aidlapplication.IEncryption" />
+                <action android:name="br.com.aidlapplication.ICypherService" />
             </intent-filter>
         </service>
 

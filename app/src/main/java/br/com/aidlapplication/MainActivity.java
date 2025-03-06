@@ -16,20 +16,21 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private IEncryption encryptionService;
+    private ICypherService cypherService;
     private boolean isBound = false;
 
+    // cria conexão para o serviço de criptografia
     private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            encryptionService = IEncryption.Stub.asInterface(service);
+            cypherService = ICypherService.Stub.asInterface(service);
             isBound = true;
             Toast.makeText(MainActivity.this, "Serviço conectado", Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            encryptionService = null;
+            cypherService = null;
             isBound = false;
             Toast.makeText(MainActivity.this, "Serviço desconectado", Toast.LENGTH_LONG).show();
         }
@@ -46,12 +47,13 @@ public class MainActivity extends AppCompatActivity {
         Button decryptButton = findViewById(R.id.decryptButton);
         TextView resultText = findViewById(R.id.resultText);
 
+        // para criptografar é necessário entrar com a chave e o texto
         encryptButton.setOnClickListener(v -> {
-            if (isBound && encryptionService != null) {
+            if (isBound && cypherService != null) {
                 try {
                     String text = inputText.getText().toString();
                     int key = Integer.parseInt(inputKey.getText().toString());
-                    String encrypted = encryptionService.encrypt(text, key);
+                    String encrypted = cypherService.encrypt(text, key);
                     resultText.setText("Criptografado: " + encrypted);
                 } catch (RemoteException | NumberFormatException e) {
                     e.printStackTrace();
@@ -60,12 +62,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // para descriptografar é necessário entrar com a mesma chave e o texto criptografado
         decryptButton.setOnClickListener(v -> {
-            if (isBound && encryptionService != null) {
+            if (isBound && cypherService != null) {
                 try {
                     String text = inputText.getText().toString();
                     int key = Integer.parseInt(inputKey.getText().toString());
-                    String decrypted = encryptionService.decrypt(text, key);
+                    String decrypted = cypherService.decrypt(text, key);
                     resultText.setText("Descriptografado: " + decrypted);
                 } catch (RemoteException | NumberFormatException e) {
                     e.printStackTrace();
@@ -78,7 +81,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Intent intent = new Intent(this, EncryptionService.class);
+        Intent intent = new Intent(this, CypherService.class);
+        // vincula o serviço de criptografia
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
